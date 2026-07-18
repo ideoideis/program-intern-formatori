@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>program formatori Art&Play #21 · ideo ideis</title>
+<meta name="description" content="Programul formatorilor Art&Play · Festivalul ideo ideis #21 · Alexandria">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="program formatori Art&Play #21 · ideo ideis">
+<meta property="og:description" content="programul formatorilor Art&Play · Alexandria">
+<meta property="og:image" content="https://ideoideis.github.io/program-intern-formatori/assets/og.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+<meta property="og:url" content="https://ideoideis.github.io/program-intern-formatori/artplay/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#1c1d20">
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../shared/schedule.css?v=1">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="eticheta"><img src="../assets/eticheta-rosie.png" alt="festivalul ideo ideis"></div>
+    <h1>festivalul #21<br>program formatori Art&Play</h1>
+    <p class="greet" id="greet" hidden></p>
+    <p class="updated"><a class="plink" href="https://ideoideis.ro/proiectele/festivalul/program/" target="_blank" rel="noopener">program public ↗</a></p>
+  </div>
+</header>
+
+<nav class="rail" aria-label="zilele festivalului"><div class="rail-inner"><div class="rail-days" id="rail"></div><div class="rail-pins" id="railpins"></div></div></nav>
+
+<div class="wrap">
+  <div class="filters collapsed" id="filters">
+    <div class="viewtog" role="group" aria-label="mod de afișare">
+      <button class="vbtn" data-view="lista" aria-pressed="true">listă</button>
+      <button class="vbtn" data-view="loc" aria-pressed="false">pe locații</button>
+    </div>
+    <button class="fhead" id="fhead" aria-expanded="false"><span id="farrow">▸</span> filtre & căutare<span class="fcount" id="fcount"></span></button>
+    <div class="fbody">
+      <input class="search" id="q" type="search" placeholder="caută: eveniment, atelier, invitat…" aria-label="caută în program">
+      <div class="chiprow" id="catchips"></div>
+      <p class="legend-note">click pe una sau mai multe categorii ca să vezi doar acel tip de evenimente · atinge din nou pentru tot programul</p>
+    </div>
+  </div>
+  <main id="days"><noscript>Pagina are nevoie de JavaScript ca să afișeze programul.</noscript></main>
+</div>
+
+<button class="fab" id="fab" hidden>acum<small id="fabt"></small></button>
+
+<script>
+/* publicul: formatorii Art&Play.
+   Atelierele Art&Play + evenimentele mari & outdoor (scena mare,
+   scena mică, Kaufland, CMT, cinematecă, paradă).
+   FĂRĂ repetiții/montări, FĂRĂ @tehnic, FĂRĂ organizare, FĂRĂ
+   transporturi, FĂRĂ trupe, FĂRĂ necesar tehnic/producție.
+   Fără 28 iulie și 5 august. */
+window.AUD = {
+  key:'artplay',
+  cats:['artplay','cmt','mare','mica','cine','kauf','parada'],
+  skipDays:['ma28','mi5'],
+  hideTrupa:true,
+  trupePicker:false,
+  compact:false,
+  transport:false,
+  showTech:false,
+  showNeeds:false,
+  greetings:null, /* aici intră replicile pentru Art&Play, când le avem */
+  sw:'../sw.js',
+  info:{ contacts:false, legend:false, trupe:false, formatori:false, arteAlaturate:false, artplay:true },
+};
+</script>
+<!-- datele vin din programul intern master: o singură sursă de adevăr -->
+<script src="https://ideoideis.github.io/program-intern-21/program.js"></script>
+<script src="../shared/schedule.js?v=1"></script>
+</body>
+</html>
