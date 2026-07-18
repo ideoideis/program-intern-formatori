@@ -294,6 +294,7 @@ infoS.innerHTML=`
     </div>`:''}
     <div class="iblock acc">
       <h3>locații & hărți</h3>
+      ${(AUD.extraLocs||[]).map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${l[2]}">hartă ↗</a></div>`).join('')}
       ${LOCS.map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${maps(l[0])}">hartă ↗</a></div>`).join('')}
     </div>
     ${INFO.legend===false?'':`<div class="iblock acc">
