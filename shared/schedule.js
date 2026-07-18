@@ -621,16 +621,34 @@ const railH=document.querySelector('nav.rail').offsetHeight;
 document.documentElement.style.setProperty('--railh',railH+'px');
 
 /* ── salutul din header: replici PROPRII paginii (AUD.greetings).
-      Fără replici, rândul stă ascuns — replicile interne ale echipei
-      nu se folosesc aici. ── */
-let lastGreet='', greetPick='';
+      Formate: listă simplă (o alegere aleatoare) sau
+      {pre:[...], zile:{mi29:[...],...}, post:[...]} — rotație pe zile,
+      «pre» înainte de festival, «post» după. Fără replici → ascuns. ── */
+let lastGreet='', greetKey='', greetPick='';
+const FEST_LAST=Object.keys(DATEMAP).map(k=>k.split('.').reverse().join('')).sort().pop();
+function isPostFestival(){
+  const parts=new Intl.DateTimeFormat('ro-RO',{timeZone:'Europe/Bucharest',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const g=t=>parts.find(x=>x.type===t).value;
+  return (g('year')+g('month')+g('day'))>FEST_LAST;
+}
 function updateGreet(n){
   const g=document.getElementById('greet'); if(!g)return;
   let txt=null;
   if(selTrupa) txt=`urmărești ${TRUPE_IDS[selTrupa]||selTrupa}`;
-  else if(Array.isArray(AUD.greetings)&&AUD.greetings.length){
-    if(!greetPick) greetPick=AUD.greetings[Math.floor(Math.random()*AUD.greetings.length)];
-    txt=greetPick;
+  else{
+    const G=AUD.greetings;
+    let pool=null,key='';
+    if(Array.isArray(G)){pool=G;key='flat';}
+    else if(G){
+      if(n&&n.day&&G.zile&&(G.zile[n.day]||[]).length){pool=G.zile[n.day];key=n.day;}
+      else if(!(n&&n.day)&&isPostFestival()){pool=G.post||null;key='post';}
+      else if(!(n&&n.day)){pool=G.pre||null;key='pre';}
+    }
+    if(pool&&pool.length){
+      /* aceeași replică pe toată ziua/perioada, aleasă aleator la încărcare */
+      if(key!==greetKey){greetKey=key;greetPick=pool[Math.floor(Math.random()*pool.length)];}
+      txt=greetPick;
+    }
   }
   if(!txt){g.hidden=true;lastGreet='';return;}
   if(txt===lastGreet) return;

@@ -73,13 +73,30 @@ window.AUD = {
   extraLocs:[['cazare · Hotel Parc Alexandria','aici stau formatorii Art&Play','https://maps.app.goo.gl/rzddxxw1zdHo56fs9']],
   showTech:false,
   showNeeds:false,
-  greetings:null, /* aici intră replicile pentru Art&Play, când le avem */
+  greetings:{
+    pre:[
+      'Alexandria își pregătește locul de joacă',
+      'în curând: ateliere, copii curioși și multe zâmbete',
+      'comunitatea abia așteaptă să vă cunoască',
+      'programul e gata · joaca poate să înceapă',
+    ],
+    zile:{
+      mi29:['bine ați venit la #21 · locul nostru e aici'],
+      j30:['prima zi de ateliere · Alexandria e curioasă'],
+      v31:['fiecare atelier lasă ceva frumos în urmă'],
+      s1:['dacă citești asta, ai o pauză. bravo. meriți.'],
+      d2:['duminica se joacă toată Alexandria'],
+      l3:['energia nu vine de la cafea. bine, nu doar.'],
+      ma4:['ultima zi · mulțumim că v-ați jucat cu noi ♥','diseară închidem frumos: gală și petrecere'],
+    },
+    post:['mulțumim · ne vedem la #22 ♥'],
+  },
   sw:'../sw.js',
   info:{ contacts:false, legend:false, trupe:false, formatori:false, arteAlaturate:false, artplay:true },
 };
 </script>
 <!-- datele vin din programul intern master: o singură sursă de adevăr -->
 <script src="https://ideoideis.github.io/program-intern-21/program.js"></script>
-<script src="../shared/schedule.js?v=4"></script>
+<script src="../shared/schedule.js?v=5"></script>
 </body>
 </html>

@@ -70,13 +70,31 @@ window.AUD = {
   extraLocs:[['cazare · Motel Restaurant Mara','aici stau formatorii','https://maps.app.goo.gl/Ywma9mjrPXJPR84Y6']],
   showTech:false,
   showNeeds:false,
-  greetings:null, /* aici intră replicile pentru formatori, când le avem */
+  greetings:{
+    pre:[
+      'programul e gata · scena vă așteaptă',
+      'Alexandria se pregătește. voi sunteți partea cea mai bună din plan.',
+      'trupele își numără zilele până vă cunosc',
+      'în curând: o săptămână de teatru, oameni și emoții bune',
+      'ne vedem în curând la Alexandria ♥',
+    ],
+    zile:{
+      mi29:['bine ați venit la #21 · locul nostru e aici'],
+      j30:['la 33 de grade, orice idee pare bună','cearcănele de mâine au scuză culturală.'],
+      v31:['a doua zi e mai ușoară decât prima. promitem.','ce construiți aici rămâne cu ei ani întregi'],
+      s1:['oameni pe care îi știi de 3 zile și parcă de 10 ani. matematică de festival.','prieteniile de aici au altă unitate de măsură'],
+      d2:['la ideo nu vii să vezi teatru. vii să te vezi.','pauza face parte din spectacol'],
+      l3:['nu ești obosit. ești în proces de creație.','mâine e ultima zi. nu, nu vorbim despre asta.'],
+      ma4:['ultima zi · diseară aplaudăm tot','mulțumim pentru tot ce ați adus aici ♥'],
+    },
+    post:['mulțumim · ne vedem la #22 ♥'],
+  },
   sw:'sw.js',
   info:{ contacts:false, legend:false, trupe:true, formatori:false, arteAlaturate:true, artplay:false },
 };
 </script>
 <!-- datele vin din programul intern master: o singură sursă de adevăr -->
 <script src="https://ideoideis.github.io/program-intern-21/program.js"></script>
-<script src="shared/schedule.js?v=4"></script>
+<script src="shared/schedule.js?v=5"></script>
 </body>
 </html>
