@@ -3,7 +3,7 @@
    Datele (program.js) vin de pe site-ul master program-intern-21:
    se cer întâi de pe rețea (mereu proaspete), cu fallback la cache.
    Paginile & schedule.js la fel; fonturile/imaginile vin din cache. */
-const CACHE = 'pf21-1'; /* bump la orice schimbare de assets/fonturi */
+const CACHE = 'pf21-2'; /* bump la orice schimbare de assets/fonturi */
 const PROGRAM = 'https://ideoideis.github.io/program-intern-21/program.js';
 const ASSETS = [
   './',
@@ -40,9 +40,10 @@ self.addEventListener('fetch', e => {
   if (!sameOrigin && !isProgram) return;
   const fresh = req.mode === 'navigate' || isProgram || req.url.includes('schedule.js');
   if (fresh) {
-    /* network-first: date proaspete când există net, cache când nu */
+    /* network-first, ocolind cache-ul HTTP (revalidare cu ETag):
+       schimbările de program se văd imediat, nu după 10 minute */
     e.respondWith(
-      fetch(req).then(r => {
+      fetch(req, { cache: 'no-cache' }).then(r => {
         const cp = r.clone();
         caches.open(CACHE).then(c => c.put(req, cp));
         return r;
