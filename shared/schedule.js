@@ -41,6 +41,10 @@ const lu=document.getElementById('lastupd'); if(lu)lu.textContent=LAST_UPDATED;
 /* ── ce evenimente intră în programul acestui public ── */
 function includeEvent(ev){
   if(ev.k==='e'){
+    const t=ev.title||'';
+    /* excepții punctuale, pe titlu: scoase sau băgate indiferent de categorie */
+    if((AUD.exclude||[]).some(x=>t.includes(x))) return false;
+    if((AUD.include||[]).some(x=>t.includes(x))) return true;
     if(!AUD.cats.includes(ev.cat||'alt')) return false;
     if(AUD.hideTrupa && ev.trupa) return false;
     if(ev.c){ /* montări / repetiții / probe */

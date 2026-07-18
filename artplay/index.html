@@ -62,6 +62,8 @@ window.AUD = {
   key:'artplay',
   cats:['tt','artplay','cmt','mare','mica','cine','kauf','parada'],
   catLabels:{ tt:'teatru tânăr · spectacole' },
+  exclude:['In a Relationship'],                  /* nu e pentru Art&Play */
+  include:['opening party','closing party'],      /* petrecerile se văd */
   skipDays:['ma28','mi5'],
   hideTrupa:false, /* spectacolele trupelor se văd; restul rândurilor de trupă dispar prin compact/transport/mese */
   trupePicker:false,
@@ -78,6 +80,6 @@ window.AUD = {
 </script>
 <!-- datele vin din programul intern master: o singură sursă de adevăr -->
 <script src="https://ideoideis.github.io/program-intern-21/program.js"></script>
-<script src="../shared/schedule.js?v=3"></script>
+<script src="../shared/schedule.js?v=4"></script>
 </body>
 </html>
