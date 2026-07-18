@@ -55,6 +55,7 @@ function includeEvent(ev){
     return true;
   }
   if(ev.k==='m'){
+    if(AUD.meals===false) return false;
     if(AUD.hideTrupa && ev.trupa) return false;
     return true; /* mesele generale rămân scheletul zilei */
   }
@@ -64,8 +65,12 @@ function includeEvent(ev){
 const SKIP=new Set(AUD.skipDays||[]);
 const DAYS_A = DAYS.filter(d=>!SKIP.has(d.id)).map(d=>({...d, events:d.events.filter(includeEvent)}));
 const DAY_IDS=new Set(DAYS_A.map(d=>d.id));
-/* categoriile prezente în acest public, în ordinea din CATS */
-const CATS_A = Object.fromEntries(Object.entries(CATS).filter(([k])=>AUD.cats.includes(k)));
+/* categoriile prezente în acest public, în ordinea din CATS
+   (cu etichete proprii paginii, unde e cazul) */
+const CATS_A = Object.fromEntries(Object.entries(CATS).filter(([k])=>AUD.cats.includes(k))
+  .map(([k,c])=>[k,{...c,label:(AUD.catLabels&&AUD.catLabels[k])||c.label}]));
+/* pe paginile pentru formatori, notele interne despre săli nu apar */
+const roomClean=s=>String(s).replace(/\s*\([^)]*\)/g,'');
 
 /* ── ora curentă în Europe/Bucharest; până în 05:00 aparține zilei
       de program precedente. Test: ?test=v31-19:32 ── */
@@ -129,7 +134,7 @@ function detailRows(ev){
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
     rows=ATELIERE_TT.map(r=>[`${r[0]} · ${r[1]}`, r[2]+(r[3]?' · '+r[3]:'')]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>[`${r[0]} · ${r[1]}`, r[2]]);
+    rows=ARTE_ALATURATE.map(r=>[`${r[0]} · ${r[1]}`, roomClean(r[2])]);
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
@@ -151,7 +156,7 @@ function evHtml(ev,dayId){
     x=`<button class="xbtn" data-x>▸ ${det.label}</button><div class="xlist">${rows}</div>`;
   }
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
-  const room=lg&&lg.sala?` · ${esc(lg.sala)}<span style="color:var(--muted)">*</span>`:'';
+  const room=lg&&lg.sala?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
   const locline=ev.loc?`<div class="locline"><b>${esc(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
   return `<article class="ev${ev.c?' compact':''}" data-eid="${eid}" data-cat="${ev.cat||'alt'}"${ev.c?' data-tech="1"':''}${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${mins(ev.t)}"${ev.e?` data-e="${mins(ev.e)}"`:''} data-search="${esc(search)}" style="--cat:${cat.color}">
     <div class="tcol"><div class="t1">${ev.t}</div>${ev.e?`<div class="t2">${ev.e}</div>`:''}</div>
@@ -162,7 +167,7 @@ function evHtml(ev,dayId){
   </article>`;
 }
 const trHtml=ev=>`<div class="tr"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="transport ${esc(ev.route.toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">transport</span><span class="tt">${ev.t}</span><span class="route">${esc(ev.route)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
-const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">masă</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${esc(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
+const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${esc(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
 const techHtml=ev=>`<div class="tech" data-s="${smins(ev)}" data-search="tehnic ${esc(ev.text.toLowerCase())}"><span class="tt">${ev.t}</span><span>@tehnic · ${esc(ev.text)}</span></div>`;
 
 /* ── vederea pe locații (grilă timp × loc) ── */
@@ -295,7 +300,7 @@ infoS.innerHTML=`
       <h3>legendă</h3>
       ${Object.values(CATS_A).map(c=>`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;background:${c.color};flex:0 0 auto"></span>${c.label}</span></div>`).join('')}
       ${AUD.transport===false?'':`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:18px;border-top:2px dashed rgba(255,196,46,.7);flex:0 0 auto"></span>transport</span></div>`}
-      <div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);flex:0 0 auto"></span>mese</span></div>
+      ${AUD.meals===false?'':`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);flex:0 0 auto"></span>mese</span></div>`}
       ${AUD.compact===false?'':`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:10px;border:1px dashed var(--muted);flex:0 0 auto"></span>montare / repetiție (contur punctat)</span></div>`}
       ${AUD.showTech===false?'':`<div class="irow"><span class="ra" style="font-family:var(--mono);font-size:12px;color:var(--amber-dim)">@tehnic · montări, repetiții, echipa tehnică</span></div>`}
     </div>`}
@@ -319,14 +324,14 @@ infoS.innerHTML=`
       <h3>arte alăturate · traineri & săli</h3>
       <div class="tscroll"><table class="ttable" style="min-width:${AUD.showNeeds!==false?560:0}px">
         <tr><th>atelier</th><th>trainer</th><th>sală</th>${AUD.showNeeds!==false?'<th>necesar</th>':''}</tr>
-        ${ARTE_ALATURATE.map(r=>`<tr><td><b>${r[0]}</b>${r[3]?`<br><small>${r[3]}</small>`:''}</td><td>${r[1]}</td><td><small>${r[2]}</small></td>${AUD.showNeeds!==false?`<td><small>${[r[4]?'tehnic: '+r[4]:'',r[5]?'producție: '+r[5]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
+        ${ARTE_ALATURATE.map(r=>`<tr><td><b>${r[0]}</b>${r[3]?`<br><small>${r[3]}</small>`:''}</td><td>${r[1]}</td><td><small>${roomClean(r[2])}</small></td>${AUD.showNeeds!==false?`<td><small>${[r[4]?'tehnic: '+r[4]:'',r[5]?'producție: '+r[5]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
       </table></div>
     </div>`:''}
     ${(INFO.artplay && typeof ARTPLAY_INFO!=='undefined')?`<div class="iblock wide acc">
       <h3>ateliere comunitate · Art&Play</h3>
       <div class="tscroll"><table class="ttable" style="min-width:${AUD.showNeeds!==false?560:0}px">
         <tr><th>atelier</th><th>sală</th><th>zile & ore</th>${AUD.showNeeds!==false?'<th>necesar</th>':''}</tr>
-        ${ARTPLAY_INFO.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<br><small>${r[1]} part.</small>`:''}</td><td><small>${r[2]}</small></td><td><small>${r[3]}<br><b>${r[4]}</b></small></td>${AUD.showNeeds!==false?`<td><small>${[r[5]?'tehnic: '+r[5]:'',r[6]?'producție: '+r[6]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
+        ${ARTPLAY_INFO.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<br><small>${r[1]} part.</small>`:''}</td><td><small>${roomClean(r[2])}</small></td><td><small>${r[3]}<br><b>${r[4]}</b></small></td>${AUD.showNeeds!==false?`<td><small>${[r[5]?'tehnic: '+r[5]:'',r[6]?'producție: '+r[6]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
       </table></div>
       <p class="inote" style="margin-top:10px">orele sunt în program, pe zilele respective · sălile sunt orientative.</p>
     </div>`:''}

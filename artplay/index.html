@@ -53,18 +53,21 @@
 <script>
 /* publicul: formatorii Art&Play.
    Atelierele Art&Play + evenimentele mari & outdoor (scena mare,
-   scena mică, Kaufland, CMT, cinematecă, paradă).
-   FĂRĂ repetiții/montări, FĂRĂ @tehnic, FĂRĂ organizare, FĂRĂ
-   transporturi, FĂRĂ trupe, FĂRĂ necesar tehnic/producție.
+   scena mică, Kaufland, CMT, cinematecă, paradă) + DOAR orele
+   spectacolelor trupelor (fără repetiții sau alte detalii).
+   FĂRĂ montări, FĂRĂ @tehnic, FĂRĂ organizare, FĂRĂ transporturi,
+   FĂRĂ mese, FĂRĂ necesar tehnic/producție.
    Fără 28 iulie și 5 august. */
 window.AUD = {
   key:'artplay',
-  cats:['artplay','cmt','mare','mica','cine','kauf','parada'],
+  cats:['tt','artplay','cmt','mare','mica','cine','kauf','parada'],
+  catLabels:{ tt:'teatru tânăr · spectacole' },
   skipDays:['ma28','mi5'],
-  hideTrupa:true,
+  hideTrupa:false, /* spectacolele trupelor se văd; restul rândurilor de trupă dispar prin compact/transport/mese */
   trupePicker:false,
   compact:false,
   transport:false,
+  meals:false,
   showTech:false,
   showNeeds:false,
   greetings:null, /* aici intră replicile pentru Art&Play, când le avem */
@@ -74,6 +77,6 @@ window.AUD = {
 </script>
 <!-- datele vin din programul intern master: o singură sursă de adevăr -->
 <script src="https://ideoideis.github.io/program-intern-21/program.js"></script>
-<script src="../shared/schedule.js?v=1"></script>
+<script src="../shared/schedule.js?v=2"></script>
 </body>
 </html>
