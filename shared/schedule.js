@@ -333,7 +333,7 @@ infoS.innerHTML=`
       </div>`).join('')}
     </div>`:''}
     ${(INFO.trupe && typeof TRUPE!=='undefined')?`<div class="iblock wide acc">
-      <h3>trupe · traineri · contacte</h3>
+      <h3>teatru tânăr</h3>
       <div class="tscroll"><table class="ttable">
         <tr><th>trupă</th><th>trainer · sală (Șc. 5)</th><th>coordonator</th><th>ghid</th></tr>
         ${TRUPE.map(r=>`<tr><td><b>${r[0]}</b></td><td><small>${r[1]}</small></td><td>${tel(r[2],r[3])}</td><td>${tel(r[4],r[5])}</td></tr>`).join('')}
@@ -349,7 +349,7 @@ infoS.innerHTML=`
       <p class="inote" style="margin-top:10px">întâlnirea mentori · participanți e în program (miercuri 29, 17:00) · alocările pe trupe se completează.</p>
     </div>`:''}
     ${(INFO.arteAlaturate && typeof ARTE_ALATURATE!=='undefined')?`<div class="iblock wide acc">
-      <h3>arte alăturate · traineri & săli</h3>
+      <h3>arte alăturate</h3>
       <div class="tscroll"><table class="ttable" style="min-width:${AUD.showNeeds!==false?560:0}px">
         <tr><th>atelier</th><th>trainer</th><th>sală</th>${AUD.showNeeds!==false?'<th>necesar</th>':''}</tr>
         ${ARTE_ALATURATE.map(r=>`<tr><td><b>${r[0]}</b>${r[3]?`<br><small>${r[3]}</small>`:''}</td><td>${r[1]}</td><td><small>${roomClean(r[2])}</small></td>${AUD.showNeeds!==false?`<td><small>${[r[4]?'tehnic: '+r[4]:'',r[5]?'producție: '+r[5]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
