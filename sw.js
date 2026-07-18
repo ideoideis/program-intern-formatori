@@ -3,7 +3,7 @@
    Datele (program.js) vin de pe site-ul master program-intern-21:
    se cer întâi de pe rețea (mereu proaspete), cu fallback la cache.
    Paginile & schedule.js la fel; fonturile/imaginile vin din cache. */
-const CACHE = 'pf21-2'; /* bump la orice schimbare de assets/fonturi */
+const CACHE = 'pf21-3'; /* bump la orice schimbare de assets/fonturi */
 const PROGRAM = 'https://ideoideis.github.io/program-intern-21/program.js';
 const ASSETS = [
   './',

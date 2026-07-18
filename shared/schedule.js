@@ -162,13 +162,29 @@ function evHtml(ev,dayId){
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
   const room=lg&&lg.sala?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
   const locline=ev.loc?`<div class="locline"><b>${esc(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
+  /* fișa spectacolului, direct pe cardul lui */
+  let tinfo='';
+  if(AUD.spectacoleInfo && ev.trupa && !ev.c && /spectacol/i.test(ev.title)
+     && typeof TRUPE_INFO!=='undefined' && TRUPE_INFO[ev.trupa]){
+    tinfo=`<button class="xbtn" data-x>▸ despre spectacol & trupă</button><div class="xlist">${trupaFisa(ev.trupa)}</div>`;
+  }
   return `<article class="ev${ev.c?' compact':''}" data-eid="${eid}" data-cat="${ev.cat||'alt'}"${ev.c?' data-tech="1"':''}${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${mins(ev.t)}"${ev.e?` data-e="${mins(ev.e)}"`:''} data-search="${esc(search)}" style="--cat:${cat.color}">
     <div class="tcol"><div class="t1">${ev.t}</div>${ev.e?`<div class="t2">${ev.e}</div>`:''}</div>
     <div>
       <div class="title">${ev.title}<span class="nowtag" hidden>acum</span></div>
-      ${locline}${subs}${x}
+      ${locline}${subs}${x}${tinfo}
     </div>
   </article>`;
+}
+/* fișa unei trupe: spectacol, echipă, distribuție, sinopsis, despre, video */
+function trupaFisa(id){
+  const i=TRUPE_INFO[id];
+  return `<p class="ti-t">„${esc(i.spectacol)}”<small> · ${esc(i.autor)}</small></p>
+    ${i.echipa?`<p class="ti-row"><b>echipa de creație</b>${esc(i.echipa)}</p>`:''}
+    ${i.distributie?`<p class="ti-row"><b>distribuție</b>${esc(i.distributie)}</p>`:''}
+    ${i.sinopsis?`<p class="ti-p">${esc(i.sinopsis)}</p>`:''}
+    ${i.despre?`<p class="ti-p ti-despre"><b>despre trupă · </b>${esc(i.despre)}</p>`:''}
+    ${i.video?`<a class="maplink" target="_blank" rel="noopener" href="${esc(i.video)}">vezi un fragment video ↗</a>`:''}`;
 }
 const trHtml=ev=>`<div class="tr"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="transport ${esc(ev.route.toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">transport</span><span class="tt">${ev.t}</span><span class="route">${esc(ev.route)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
 const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${esc(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
@@ -309,6 +325,13 @@ infoS.innerHTML=`
       ${AUD.compact===false?'':`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:10px;border:1px dashed var(--muted);flex:0 0 auto"></span>montare / repetiție (contur punctat)</span></div>`}
       ${AUD.showTech===false?'':`<div class="irow"><span class="ra" style="font-family:var(--mono);font-size:12px;color:var(--amber-dim)">@tehnic · montări, repetiții, echipa tehnică</span></div>`}
     </div>`}
+    ${(INFO.spectacole && typeof TRUPE_INFO!=='undefined' && typeof TRUPE_IDS!=='undefined')?`<div class="iblock wide acc">
+      <h3>spectacolele trupelor</h3>
+      ${Object.keys(TRUPE_IDS).filter(id=>TRUPE_INFO[id]).map(id=>`<div class="iblock acc tacc">
+        <h3>${esc(TRUPE_IDS[id])} <small>· ${esc(TRUPE_INFO[id].oras)} · „${esc(TRUPE_INFO[id].spectacol)}”</small></h3>
+        <div class="ti-body">${trupaFisa(id)}</div>
+      </div>`).join('')}
+    </div>`:''}
     ${(INFO.trupe && typeof TRUPE!=='undefined')?`<div class="iblock wide acc">
       <h3>trupe · traineri · contacte</h3>
       <div class="tscroll"><table class="ttable">
