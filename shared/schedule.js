@@ -596,6 +596,16 @@ const fab=document.getElementById('fab');
 const fabT=document.getElementById('fabt');
 const nowlineEl=document.createElement('div');
 nowlineEl.className='nowline'; nowlineEl.innerHTML='<span></span>';
+function updateMealEgg(n){
+  const el=document.getElementById('mealegg'); if(!el) return;
+  const links=(typeof MENIURI!=='undefined')?MENIURI:null;
+  if(!links||!links.length||!(n&&n.day)){el.hidden=true; return;}
+  const m=(((n.mins%1440)+1440)%1440);
+  const inWin=(m>=480&&m<600)||(m>=840&&m<960)||(m>=1200&&m<1320); /* 08–10 · 14–16 · 20–22 */
+  if(!inWin){el.hidden=true; return;}
+  el.innerHTML='<span class="me-t">ți-e foame?</span> '+links.map(x=>`<a href="${x[2]}" target="_blank" rel="noopener">${esc(x[0])} ↗</a>`).join(' · ');
+  el.hidden=false;
+}
 function updateNow(){
   const n=nowA();
   document.querySelectorAll('.nowtag').forEach(x=>x.hidden=true);
@@ -605,6 +615,7 @@ function updateNow(){
   fab.hidden=!n.day;
   window.CURRENT_DAY=n.day||null;
   updateGreet(n);
+  updateMealEgg(n);
   if(!n.day) return;
   fabT.textContent=(n.demo?'demo · ':'')+n.hm;
   const sec=document.getElementById('day-'+n.day);
