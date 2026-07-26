@@ -118,9 +118,6 @@ section.day.on{display:block}
 .title{font-weight:600;font-size:16.5px;line-height:1.25}
 .locline{margin-top:3px;font-size:13px;color:var(--muted)}
 .locline b{color:#c7c9cf;font-weight:500}
-.mln{color:inherit;text-decoration:none}
-.mln::after{content:'↗';color:var(--amber-dim);font-size:.82em;margin-left:2px}
-.mln:hover{text-decoration:underline;text-decoration-color:var(--amber-dim)}
 .sub{margin-top:4px;font-size:13.5px;color:#c7c9cf}
 .sub.note{color:var(--muted)}
 .ev.now-active{border-color:var(--red);border-left-color:var(--red)}
@@ -200,6 +197,7 @@ section.day.on{display:block}
 .irow .rb{color:var(--muted);font-size:13px;flex:0 0 auto;font-variant-numeric:tabular-nums}
 .maplink{font-family:var(--mono);font-size:11px;color:var(--amber);text-decoration:none;flex:0 0 auto}
 .maplink:hover{text-decoration:underline}
+.ilinks{display:flex;gap:12px;flex:0 0 auto;align-items:baseline}
 .bigpublic{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--red);color:#fff;text-decoration:none;padding:16px;font-weight:700;font-size:17px;margin-bottom:4px}
 .bigpublic small{display:block;font-weight:400;font-family:var(--mono);font-size:11px;opacity:.85;margin-top:2px}
 .inote{font-size:13px;color:var(--muted)}
@@ -236,11 +234,6 @@ section.day.on{display:block}
 
 /* ── personalizări ───────────────────────── */
 .greet{margin:22px 0 0;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.03em;min-height:1.2em}
-.mealegg{margin:8px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--amber-dim);letter-spacing:.02em}
-.mealegg[hidden]{display:none}
-.mealegg .me-t{color:var(--muted)}
-.mealegg a{color:var(--amber);text-decoration:none}
-.mealegg a:hover{text-decoration:underline}
 .greet[hidden]{display:none}
 .greet .gcursor{color:var(--red);animation:gblink 1s steps(1) infinite}
 @keyframes gblink{50%{opacity:0}}

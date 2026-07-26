@@ -149,9 +149,8 @@ function detailRows(ev){
   return rows.length?{label:ev.xlabel||'detalii',rows}:null;
 }
 const slug=s=>s.toLowerCase().replace(/<[^>]*>/g,'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,28);
-/* localuri cu meniu online (Alex Tell, Conciato din MENIURI): numele lor devine link către meniu */
+/* localuri cu meniu online (Alex Tell, Conciato din MENIURI): link de meniu DOAR în +info, lângă hartă */
 const _MENU=(()=>{const m={};if(typeof MENIURI!=='undefined')MENIURI.forEach(x=>m[x[0]]=x[2]);return m;})();
-const locMenu=loc=>{const u=_MENU[loc];return u?`<a class="mln" href="${u}" target="_blank" rel="noopener">${esc(loc)}</a>`:esc(loc);};
 function evHtml(ev,dayId){
   const cat=CATS[ev.cat]||CATS.alt;
   const eid=`${dayId}-${ev.t.replace(':','')}-${slug(ev.title)}`;
@@ -165,7 +164,7 @@ function evHtml(ev,dayId){
   }
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
   const room=lg&&lg.sala?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
-  const locline=ev.loc?`<div class="locline"><b>${locMenu(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
+  const locline=ev.loc?`<div class="locline"><b>${esc(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
   /* fișa spectacolului, direct pe cardul lui */
   let tinfo='';
   if(AUD.spectacoleInfo && ev.trupa && !ev.c && /spectacol/i.test(ev.title)
@@ -191,7 +190,7 @@ function trupaFisa(id){
     ${i.video?`<a class="maplink" target="_blank" rel="noopener" href="${esc(i.video)}">vezi un fragment video ↗</a>`:''}`;
 }
 const trHtml=ev=>`<div class="tr"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="transport ${esc(ev.route.toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">transport</span><span class="tt">${ev.t}</span><span class="route">${esc(ev.route)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
-const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${locMenu(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
+const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${esc(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
 const techHtml=ev=>`<div class="tech" data-s="${smins(ev)}" data-search="tehnic ${esc(ev.text.toLowerCase())}"><span class="tt">${ev.t}</span><span>@tehnic · ${esc(ev.text)}</span></div>`;
 
 /* ── vederea pe locații (grilă timp × loc) ── */
@@ -319,11 +318,7 @@ infoS.innerHTML=`
     <div class="iblock acc">
       <h3>locații & hărți</h3>
       ${(AUD.extraLocs||[]).map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${l[2]}">hartă ↗</a></div>`).join('')}
-      ${LOCS.map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${maps(l[0])}">hartă ↗</a></div>`).join('')}
-    </div>
-    <div class="iblock">
-      <h3>cazare</h3>
-      <div class="irow"><span class="ra">Red Confort Hotel</span><a class="maplink" target="_blank" rel="noopener" href="https://maps.app.goo.gl/C9opc8bwQ3TYuGrn8">hartă ↗</a></div>
+      ${LOCS.map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><span class="ilinks">${_MENU[l[0]]?`<a class="maplink" target="_blank" rel="noopener" href="${_MENU[l[0]]}">meniu ↗</a>`:''}<a class="maplink" target="_blank" rel="noopener" href="${maps(l[0])}">hartă ↗</a></span></div>`).join('')}
     </div>
     ${INFO.legend===false?'':`<div class="iblock acc">
       <h3>legendă</h3>
@@ -604,16 +599,6 @@ const fab=document.getElementById('fab');
 const fabT=document.getElementById('fabt');
 const nowlineEl=document.createElement('div');
 nowlineEl.className='nowline'; nowlineEl.innerHTML='<span></span>';
-function updateMealEgg(n){
-  const el=document.getElementById('mealegg'); if(!el) return;
-  const links=(typeof MENIURI!=='undefined')?MENIURI:null;
-  if(!links||!links.length||!(n&&n.day)){el.hidden=true; return;}
-  const m=(((n.mins%1440)+1440)%1440);
-  const inWin=(m>=480&&m<600)||(m>=840&&m<960)||(m>=1200&&m<1320); /* 08–10 · 14–16 · 20–22 */
-  if(!inWin){el.hidden=true; return;}
-  el.innerHTML='<span class="me-t">ți-e foame?</span> '+links.map(x=>`<a href="${x[2]}" target="_blank" rel="noopener">${esc(x[0])} ↗</a>`).join(' · ');
-  el.hidden=false;
-}
 function updateNow(){
   const n=nowA();
   document.querySelectorAll('.nowtag').forEach(x=>x.hidden=true);
@@ -623,7 +608,6 @@ function updateNow(){
   fab.hidden=!n.day;
   window.CURRENT_DAY=n.day||null;
   updateGreet(n);
-  updateMealEgg(n);
   if(!n.day) return;
   fabT.textContent=(n.demo?'demo · ':'')+n.hm;
   const sec=document.getElementById('day-'+n.day);
