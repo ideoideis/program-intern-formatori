@@ -39,6 +39,7 @@ const maps = q => 'https://www.google.com/maps/search/?api=1&query='+encodeURICo
 const lu=document.getElementById('lastupd'); if(lu)lu.textContent=LAST_UPDATED;
 
 /* ── ce evenimente intră în programul acestui public ── */
+function deDiac(s){return String(s).toLowerCase().replace(/[ăâáà]/g,'a').replace(/[îí]/g,'i').replace(/[éè]/g,'e').replace(/[óò]/g,'o').replace(/[úù]/g,'u').replace(/[șş]/g,'s').replace(/[țţ]/g,'t');}
 function includeEvent(ev){
   if(ev.k==='e'){
     const t=ev.title||'';
@@ -373,9 +374,9 @@ daysEl.appendChild(infoS);
 /* căutarea în contacte */
 infoS.addEventListener('input',e=>{
   if(e.target.id!=='cq')return;
-  const term=e.target.value.trim().toLowerCase();
+  const term=deDiac(e.target.value.trim().toLowerCase());
   infoS.querySelectorAll('#cblock .crow').forEach(r=>{
-    r.style.display=(!term||r.dataset.s.includes(term))?'':'none';
+    r.style.display=(!term||deDiac(r.dataset.s).includes(term))?'':'none';
   });
   infoS.querySelectorAll('#cblock .cdep').forEach(d=>{
     const any=[...d.querySelectorAll('.crow')].some(r=>r.style.display!=='none');
@@ -504,11 +505,11 @@ sres.id='sres'; sres.hidden=true;
 q.after(sres);
 const DAYSHORT=Object.fromEntries(DAYS_A.map(d=>[d.id,`${d.dw} ${d.dn} ${d.full.split(' ')[1]||''}`.trim()]));
 function globalSearch(){
-  const term=q.value.trim().toLowerCase();
+  const term=deDiac(q.value.trim().toLowerCase());
   if(term.length<2){sres.hidden=true;sres.innerHTML='';return;}
   const hits=[];
   document.querySelectorAll('section.day .viewlist .ev').forEach(ev=>{
-    if((ev.dataset.search||'').includes(term)){
+    if(deDiac(ev.dataset.search||'').includes(term)){
       const day=ev.closest('section.day').id.replace('day-','');
       const c=ev.querySelector('.title').cloneNode(true);
       c.querySelectorAll('.nowtag,.minetag').forEach(x=>x.remove());
@@ -539,7 +540,7 @@ sres.addEventListener('click',e=>{
   }
 });
 function applyFilters(){
-  const term=q.value.trim().toLowerCase();
+  const term=deDiac(q.value.trim().toLowerCase());
   const filtering=selCats.size>0;
   const techOn=techChip?techChip.getAttribute('aria-pressed')==='true':true;
   const nActive=selCats.size+(techChip&&!techOn?1:0)+(term?1:0);
@@ -556,7 +557,7 @@ function applyFilters(){
       if(filtering && el.dataset.cat) show=selCats.has(el.dataset.cat);
       if(show && el.dataset.tech && !techOn) show=false;
     }
-    if(show && term && el.dataset.search!==undefined && !el.dataset.search.includes(term)) show=false;
+    if(show && term && el.dataset.search!==undefined && !deDiac(el.dataset.search).includes(term)) show=false;
     el.style.display=show?'':'none';
   });
 }
