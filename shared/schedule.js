@@ -330,7 +330,6 @@ infoS.innerHTML=`
     </div>`}
     ${(INFO.spectacole && typeof TRUPE_INFO!=='undefined' && typeof TRUPE_IDS!=='undefined')?`<div class="iblock wide acc">
       <h3>spectacolele trupelor</h3>
-      <p class="inote" style="margin:2px 0 10px">apasă pe o trupă pentru sinopsis, distribuție, echipă, despre trupă & video</p>
       ${Object.keys(TRUPE_IDS).filter(id=>TRUPE_INFO[id]).map(id=>`<div class="iblock acc tacc">
         <h3>${esc(TRUPE_IDS[id])} <small>· ${esc(TRUPE_INFO[id].oras)} · „${esc(TRUPE_INFO[id].spectacol)}”</small></h3>
         <div class="ti-body">${trupaFisa(id)}</div>
@@ -358,11 +357,10 @@ infoS.innerHTML=`
         <tr><th>atelier</th><th>trainer</th><th>sală</th>${AUD.showNeeds!==false?'<th>necesar</th>':''}</tr>
         ${ARTE_ALATURATE.map(r=>`<tr><td><b>${r[0]}</b>${r[3]?`<br><small>${r[3]}</small>`:''}</td><td>${r[1]}</td><td><small>${roomClean(r[2])}</small></td>${AUD.showNeeds!==false?`<td><small>${[r[4]?'tehnic: '+r[4]:'',r[5]?'producție: '+r[5]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
       </table></div>
-      ${typeof ARTE_PARTICIPANTI!=='undefined'?`<p class="inote" style="margin:14px 0 8px">apasă pe un atelier pentru lista de participanți</p>
-      ${ARTE_ALATURATE.filter(r=>ARTE_PARTICIPANTI[r[0]]).map(r=>{const gs=ARTE_PARTICIPANTI[r[0]];const n=gs.reduce((s,g)=>s+g.length-1,0);return `<div class="iblock acc tacc">
+      ${typeof ARTE_PARTICIPANTI!=='undefined'?`<div style="margin-top:14px">${ARTE_ALATURATE.filter(r=>ARTE_PARTICIPANTI[r[0]]).map(r=>{const gs=ARTE_PARTICIPANTI[r[0]];const n=gs.reduce((s,g)=>s+g.length-1,0);return `<div class="iblock acc tacc">
         <h3>${esc(r[0])} <small>· ${esc(r[1])} · ${n} participanți</small></h3>
         <div class="ti-body">${gs.map(g=>`<p class="ti-row"><b>${esc(g[0])}</b>${g.slice(1).map(esc).join(', ')}</p>`).join('')}</div>
-      </div>`;}).join('')}`:''}
+      </div>`;}).join('')}</div>`:''}
     </div>`:''}
     ${(INFO.artplay && typeof ARTPLAY_INFO!=='undefined')?`<div class="iblock wide acc">
       <h3>ateliere comunitate · Art&Play</h3>
