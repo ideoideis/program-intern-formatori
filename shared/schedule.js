@@ -318,6 +318,14 @@ infoS.innerHTML=`
       ${(AUD.extraLocs||[]).map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${l[2]}">hartă ↗</a></div>`).join('')}
       ${LOCS.map(l=>`<div class="irow"><span class="ra">${l[0]}${l[1]?`<small>${l[1]}</small>`:''}</span><a class="maplink" target="_blank" rel="noopener" href="${maps(l[0])}">hartă ↗</a></div>`).join('')}
     </div>
+    <div class="iblock">
+      <h3>cazare</h3>
+      <div class="irow"><span class="ra">Red Confort Hotel</span><a class="maplink" target="_blank" rel="noopener" href="https://maps.app.goo.gl/C9opc8bwQ3TYuGrn8">hartă ↗</a></div>
+    </div>
+    ${typeof MENIURI==='undefined'?'':`<div class="iblock">
+      <h3>mâncare · comenzi</h3>
+      ${MENIURI.map(m=>`<div class="irow"><span class="ra">${esc(m[0])}</span><a class="maplink" target="_blank" rel="noopener" href="${m[2]}">${esc(m[1])} ↗</a></div>`).join('')}
+    </div>`}
     ${INFO.legend===false?'':`<div class="iblock acc">
       <h3>legendă</h3>
       ${Object.values(CATS_A).map(c=>`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;background:${c.color};flex:0 0 auto"></span>${c.label}</span></div>`).join('')}
