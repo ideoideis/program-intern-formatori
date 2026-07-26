@@ -149,6 +149,9 @@ function detailRows(ev){
   return rows.length?{label:ev.xlabel||'detalii',rows}:null;
 }
 const slug=s=>s.toLowerCase().replace(/<[^>]*>/g,'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,28);
+/* localuri cu meniu online (Alex Tell, Conciato din MENIURI): numele lor devine link către meniu */
+const _MENU=(()=>{const m={};if(typeof MENIURI!=='undefined')MENIURI.forEach(x=>m[x[0]]=x[2]);return m;})();
+const locMenu=loc=>{const u=_MENU[loc];return u?`<a class="mln" href="${u}" target="_blank" rel="noopener">${esc(loc)}</a>`:esc(loc);};
 function evHtml(ev,dayId){
   const cat=CATS[ev.cat]||CATS.alt;
   const eid=`${dayId}-${ev.t.replace(':','')}-${slug(ev.title)}`;
@@ -162,7 +165,7 @@ function evHtml(ev,dayId){
   }
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
   const room=lg&&lg.sala?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
-  const locline=ev.loc?`<div class="locline"><b>${esc(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
+  const locline=ev.loc?`<div class="locline"><b>${locMenu(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
   /* fișa spectacolului, direct pe cardul lui */
   let tinfo='';
   if(AUD.spectacoleInfo && ev.trupa && !ev.c && /spectacol/i.test(ev.title)
@@ -188,7 +191,7 @@ function trupaFisa(id){
     ${i.video?`<a class="maplink" target="_blank" rel="noopener" href="${esc(i.video)}">vezi un fragment video ↗</a>`:''}`;
 }
 const trHtml=ev=>`<div class="tr"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="transport ${esc(ev.route.toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">transport</span><span class="tt">${ev.t}</span><span class="route">${esc(ev.route)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
-const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${esc(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
+const mealHtml=ev=>`<div class="meal"${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${smins(ev)}" data-search="masa ${ev.meal} ${esc((ev.loc||'').toLowerCase())} ${esc((ev.note||'').toLowerCase())}"><span class="tag">${AUD.mealLabel||'masă'}</span><span class="tt">${ev.t}–${ev.e}</span><span class="mt">${ev.meal} · ${locMenu(ev.loc)}</span>${ev.note?`<span class="note">${esc(ev.note)}</span>`:''}</div>`;
 const techHtml=ev=>`<div class="tech" data-s="${smins(ev)}" data-search="tehnic ${esc(ev.text.toLowerCase())}"><span class="tt">${ev.t}</span><span>@tehnic · ${esc(ev.text)}</span></div>`;
 
 /* ── vederea pe locații (grilă timp × loc) ── */
@@ -322,10 +325,6 @@ infoS.innerHTML=`
       <h3>cazare</h3>
       <div class="irow"><span class="ra">Red Confort Hotel</span><a class="maplink" target="_blank" rel="noopener" href="https://maps.app.goo.gl/C9opc8bwQ3TYuGrn8">hartă ↗</a></div>
     </div>
-    ${typeof MENIURI==='undefined'?'':`<div class="iblock">
-      <h3>mâncare · comenzi</h3>
-      ${MENIURI.map(m=>`<div class="irow"><span class="ra">${esc(m[0])}</span><a class="maplink" target="_blank" rel="noopener" href="${m[2]}">${esc(m[1])} ↗</a></div>`).join('')}
-    </div>`}
     ${INFO.legend===false?'':`<div class="iblock acc">
       <h3>legendă</h3>
       ${Object.values(CATS_A).map(c=>`<div class="irow"><span class="ra" style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;background:${c.color};flex:0 0 auto"></span>${c.label}</span></div>`).join('')}
