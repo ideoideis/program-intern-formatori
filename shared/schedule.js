@@ -339,9 +339,8 @@ infoS.innerHTML=`
       <h3>teatru tânăr</h3>
       <div class="tscroll"><table class="ttable">
         <tr><th>trupă</th><th>trainer · sală (Șc. 5)</th><th>coordonator</th><th>ghid</th></tr>
-        ${TRUPE.map(r=>`<tr><td><b>${r[0]}</b></td><td><small>${r[1]}</small></td><td>${tel(r[2],r[3])}</td><td>${tel(r[4],r[5])}</td></tr>`).join('')}
+        ${TRUPE.map(r=>{const np=(typeof REPARTIZARE!=='undefined'&&typeof TRUPE_IDS!=='undefined')?(()=>{const s=Object.keys(TRUPE_IDS).find(k=>TRUPE_IDS[k]===r[0]);return s&&REPARTIZARE[s]?REPARTIZARE[s][1].length:0;})():0;return `<tr><td><b>${r[0]}</b>${np?`<br><small>${np} participanți</small>`:''}</td><td><small>${r[1]}</small></td><td>${tel(r[2],r[3])}</td><td>${tel(r[4],r[5])}</td></tr>`;}).join('')}
       </table></div>
-      <p class="inote" style="margin-top:10px">sălile de atelier sunt orientative · mentorii și ghizii se completează.</p>
     </div>`:''}
     ${(INFO.formatori && typeof FORMATORI!=='undefined')?`<div class="iblock wide acc">
       <h3>formatori & mentori</h3>
