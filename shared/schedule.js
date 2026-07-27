@@ -139,17 +139,14 @@ function detailRows(ev){
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
     rows=ATELIERE_TT.map(r=>[`${r[0]} · ${r[1]}`, r[2]+(r[3]?' · '+r[3]:'')]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>{
-      const gs=(typeof ARTE_PARTICIPANTI!=='undefined')?ARTE_PARTICIPANTI[r[0]]:null;
-      const btn=gs?`<button type="button" class="pbtn" data-part="${esc(r[0])}" aria-label="cine e repartizat la ${esc(r[0])}">participanți<span class="pbn">${gs.reduce((s,g)=>s+g.length-1,0)}</span><span class="pbc">›</span></button>`:'';
-      return ['@html', `<div class="xrow"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${roomClean(r[2])}${btn}</span></div>`];
-    });
+    rows=ARTE_ALATURATE.map(r=>[`${r[0]} · ${r[1]}`, roomClean(r[2])]);
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
     if(needs&&lg.tehnic)rows.push(['necesar tehnic',lg.tehnic]);
     if(needs&&lg.prod)rows.push(['necesar producție',lg.prod]);
   }
+  if(ev.title==='ateliere arte alăturate' && typeof ARTE_PARTICIPANTI!=='undefined') rows.push(['@html', `<button type="button" class="partlink" data-partall>vezi repartizarea participanților pe ateliere <span class="pbc">›</span></button>`]);
   return rows.length?{label:ev.xlabel||'detalii',rows}:null;
 }
 const slug=s=>s.toLowerCase().replace(/<[^>]*>/g,'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,28);
@@ -372,7 +369,6 @@ infoS.innerHTML=`
         <tr><th>atelier</th><th>sală</th><th>zile & ore</th>${AUD.showNeeds!==false?'<th>necesar</th>':''}</tr>
         ${ARTPLAY_INFO.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<br><small>${r[1]} part.</small>`:''}</td><td><small>${roomClean(r[2])}</small></td><td><small>${r[3]}<br><b>${r[4]}</b></small></td>${AUD.showNeeds!==false?`<td><small>${[r[5]?'tehnic: '+r[5]:'',r[6]?'producție: '+r[6]:''].filter(Boolean).join('<br>')||'·'}</small></td>`:''}</tr>`).join('')}
       </table></div>
-      <p class="inote" style="margin-top:10px">orele sunt în program, pe zilele respective · sălile sunt orientative.</p>
     </div>`:''}
   </div>`;
 daysEl.appendChild(infoS);
@@ -592,9 +588,17 @@ function openPartSheet(atelier){
   document.body.classList.add('sheet-open');
   _psheet.querySelector('.sheet-x').focus();
 }
+function openAllPartSheet(){
+  if(typeof ARTE_PARTICIPANTI==='undefined')return;
+  _pst.textContent='repartizarea participanților pe ateliere';
+  _psb.innerHTML='<div class="partsheet">'+Object.keys(ARTE_PARTICIPANTI).map(a=>{const gs=ARTE_PARTICIPANTI[a];const n=gs.reduce((s,g)=>s+g.length-1,0);return `<div class="partgrp"><h4 class="parth">${esc(a)}<small> · ${n} participanți</small></h4>${gs.map(g=>`<p class="ti-row"><b>${esc(g[0])}</b>${g.slice(1).map(esc).join(', ')}</p>`).join('')}</div>`;}).join('')+'</div>';
+  _psheet.hidden=false; requestAnimationFrame(()=>_psheet.classList.add('open'));
+  document.body.classList.add('sheet-open');
+  _psheet.querySelector('.sheet-x').focus();
+}
 function closePartSheet(){_psheet.classList.remove('open');document.body.classList.remove('sheet-open');setTimeout(()=>{_psheet.hidden=true;},220);}
 _psheet.addEventListener('click',e=>{if(e.target===_psheet||e.target.closest('.sheet-x'))closePartSheet();});
-document.addEventListener('click',e=>{const b=e.target.closest('.pbtn[data-part]');if(b){e.preventDefault();openPartSheet(b.dataset.part);}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-partall]');if(b){e.preventDefault();openAllPartSheet();}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!_psheet.hidden)closePartSheet();});
 
 /* schimbarea zilei */
