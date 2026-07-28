@@ -155,9 +155,9 @@ function detailRows(ev){
   const needs=AUD.showNeeds!==false;
   let rows=[];
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
-    rows=ATELIERE_TT.map(r=>['@html',`<div class="xrow" style="align-items:flex-start"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${esc(r[2])}${r[3]?' · '+esc(r[3]):''}${r[4]?peopleButton(peopleFromStr(r[4]),'voluntari',`${r[0]} · ${r[1]}`):''}</span></div>`]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
+    rows=ATELIERE_TT.map(r=>['@at', r[0], [r[1],r[3]].filter(Boolean).join(' · '), r[2]?roomClean(r[2]):'', r[4]?peopleButton(peopleFromStr(r[4]),'voluntari',`${r[0]} · ${r[1]}`):'']).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>['@html',`<div class="xrow" style="align-items:flex-start"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${esc(roomClean(r[2]))}${r[6]?peopleButton(peopleFromStr(r[6]),'voluntari',`${r[0]}`):''}</span></div>`]);
+    rows=ARTE_ALATURATE.map(r=>['@at', r[0], r[1]||'', r[2]?roomClean(r[2]):'', r[6]?peopleButton(peopleFromStr(r[6]),'voluntari',`${r[0]} · ${r[1]}`):'']);
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
@@ -178,7 +178,11 @@ function evHtml(ev,dayId){
   const search=[ev.title,ev.loc,ev.locd,(ev.sub||[]).join(' '),(det?det.rows.flat().join(' '):'')].join(' ').toLowerCase();
   let x='';
   if(det){
-    const rows=det.rows.map(r=>r[0]==='@html'?r[1]:`<div class="xrow"><span class="xa">${r[0]}</span><span class="xb">${r[1]}</span></div>`).join('');
+    const rows=det.rows.map(r=>
+      r[0]==='@html'?r[1]:
+      r[0]==='@at'?`<div class="xrow atrow"><div class="atinfo"><span class="atname">${r[1]}</span>${r[2]?`<span class="atsub">${r[2]}</span>`:''}</div><div class="atside">${r[3]?`<span class="atsala">${r[3]}</span>`:''}${r[4]}</div></div>`:
+      `<div class="xrow"><span class="xa">${r[0]}</span><span class="xb">${r[1]}</span></div>`
+    ).join('');
     x=`<button class="xbtn" data-x>▸ ${det.label}</button><div class="xlist">${rows}</div>`;
   }
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
