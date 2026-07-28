@@ -198,7 +198,7 @@ function detailRows(ev,dayId){
   }
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
-    if(lg.n)rows.push(['participanți',lg.n]);
+    if(lg.n && !rows.some(r=>r[0]==='prezență'))rows.push(['participanți',lg.n]);
     if(needs&&lg.tehnic)rows.push(['necesar tehnic',lg.tehnic]);
     if(needs&&lg.prod)rows.push(['necesar producție',lg.prod]);
   }
