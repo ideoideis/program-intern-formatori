@@ -50,6 +50,15 @@ let _pgSeq=0; const PEOPLE_GROUPS={};
 function peopleButton(people,btnLabel,sheetTitle){people=(people||[]).filter(Boolean);if(!people.length)return '';const id='pg'+(++_pgSeq);PEOPLE_GROUPS[id]={label:sheetTitle||btnLabel,people};const names=people.map(p=>p.name).join(', ');return `<button type="button" class="pbtn" data-people="${id}" aria-label="${esc(btnLabel+': '+names)}">${esc(btnLabel)}${people.length>1?`<span class="pbn">${people.length}</span>`:''}<span class="pbc">›</span></button>`;}
 function _initials(n){return n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
 function _hue(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
+/* ── prezență ateliere: buton „prezență" per atelier → formular bifat, salvat CENTRAL (Supabase) ── */
+const PZ_SUPA_URL='https://waqyaewaldphstmiobjj.supabase.co';
+const PZ_SUPA_KEY='sb_publishable_XtarsOK52eqlRUmv1ElS4Q_RwrDK78G'; /* cheia publică, ca pe programul mare */
+const pzSb=(path,opt={})=>fetch(PZ_SUPA_URL+'/rest/v1'+path,Object.assign({},opt,{headers:Object.assign({apikey:PZ_SUPA_KEY,Authorization:'Bearer '+PZ_SUPA_KEY,'Content-Type':'application/json'},opt.headers||{})}));
+const _slugOf={}; if(typeof TRUPE_IDS!=='undefined')Object.entries(TRUPE_IDS).forEach(([slug,nm])=>{_slugOf[nm]=slug;});
+function ttRoster(trupaName){const slug=_slugOf[trupaName];if(slug&&typeof REPARTIZARE!=='undefined'&&REPARTIZARE[slug])return REPARTIZARE[slug][1].map(x=>({name:x[0],sub:''}));return [];}
+function arteRoster(atelierName){const g=(typeof ARTE_PARTICIPANTI!=='undefined')&&ARTE_PARTICIPANTI[atelierName];if(!g)return [];return g.flatMap(r=>r.slice(1).map(n=>({name:n,sub:r[0]})));}
+let _pzSeq=0; const PREZ_GROUPS={};
+function prezButton(zi,atelierKey,label,people){people=(people||[]).filter(Boolean);if(!people.length||!zi)return '';const id='pz'+(++_pzSeq);PREZ_GROUPS[id]={zi,atelier:atelierKey,label,people};return `<button type="button" class="pzbtn" data-prez="${id}" aria-label="prezență ${esc(label)}">prezență<span class="pbc">›</span></button>`;}
 const mins = hm => { const [h,m]=hm.split(':').map(Number); let v=h*60+m; if(h<5)v+=1440; return v; };
 const smins = ev => mins(ev.ts || ev.t);
 const maps = q => 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((typeof MAPQ!=='undefined'&&MAPQ[q])||q+' Alexandria');
@@ -150,14 +159,22 @@ infoChip.addEventListener('click',()=>selectDay('info',true));
 document.getElementById('railpins').appendChild(infoChip);
 
 /* ── vederea listă ──────────────────────── */
-function detailRows(ev){
+function detailRows(ev,dayId){
   if(ev.xlist) return {label:ev.xlabel, rows:ev.xlist.map(r=>[r[1],r[0]])};
   const needs=AUD.showNeeds!==false;
   let rows=[];
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
-    rows=ATELIERE_TT.map(r=>['@at', r[0], [r[1],r[3]].filter(Boolean).join(' · '), r[2]?roomClean(r[2]):'', r[4]?peopleButton(peopleFromStr(r[4]),'voluntari',`${r[0]} · ${r[1]}`):'']).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
+    rows=ATELIERE_TT.map(r=>{
+      const vol=r[4]?peopleButton(peopleFromStr(r[4]),'voluntari',`${r[0]} · ${r[1]}`):'';
+      const prez=prezButton(dayId,'tt:'+(_slugOf[r[0]]||r[0]),`${r[0]} · teatru tânăr`,ttRoster(r[0]));
+      return ['@at', r[0], [r[1],r[3]].filter(Boolean).join(' · '), r[2]?roomClean(r[2]):'', vol+prez];
+    }).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>['@at', r[0], r[1]||'', r[2]?roomClean(r[2]):'', r[6]?peopleButton(peopleFromStr(r[6]),'voluntari',`${r[0]} · ${r[1]}`):'']);
+    rows=ARTE_ALATURATE.map(r=>{
+      const vol=r[6]?peopleButton(peopleFromStr(r[6]),'voluntari',`${r[0]} · ${r[1]}`):'';
+      const prez=prezButton(dayId,'arte:'+r[0],`${r[0]} · ${r[1]||''}`,arteRoster(r[0]));
+      return ['@at', r[0], r[1]||'', r[2]?roomClean(r[2]):'', vol+prez];
+    });
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
@@ -174,7 +191,7 @@ function evHtml(ev,dayId){
   const cat=CATS[ev.cat]||CATS.alt;
   const eid=`${dayId}-${ev.t.replace(':','')}-${slug(ev.title)}`;
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
-  const det=detailRows(ev);
+  const det=detailRows(ev,dayId);
   const search=[ev.title,ev.loc,ev.locd,(ev.sub||[]).join(' '),(det?det.rows.flat().join(' '):'')].join(' ').toLowerCase();
   let x='';
   if(det){
@@ -623,6 +640,46 @@ _psheet.addEventListener('click',e=>{if(e.target===_psheet||e.target.closest('.s
 document.addEventListener('click',e=>{const b=e.target.closest('[data-partall]');if(b){e.preventDefault();openAllPartSheet();}});
 function openPeopleF(id){const g=PEOPLE_GROUPS[id];if(!g)return;_pst.textContent=g.label;_psb.innerHTML='<div class="plist">'+g.people.map(p=>{const nm=p.name||'';const av=p.photo?`<img class="pav" src="${p.photo}" alt="${esc(nm)}">`:`<span class="pav ini" style="--h:${_hue(nm)}">${esc(_initials(nm))}</span>`;const role=p.role?`<span class="prole">${esc(p.role)}</span>`:'';const tel=(p.tel||'').replace(/\s/g,'');const call=tel?`<a class="pcall" href="tel:${tel}">sună</a>`:`<span class="pcall no">fără nr.</span>`;return `<div class="prow">${av}<div class="pinfo"><span class="pnm">${esc(nm)}</span>${role}</div>${call}</div>`;}).join('')+'</div>';_psheet.hidden=false;requestAnimationFrame(()=>_psheet.classList.add('open'));document.body.classList.add('sheet-open');const x=_psheet.querySelector('.sheet-x');if(x)x.focus();}
 document.addEventListener('click',e=>{const b=e.target.closest('.pbtn[data-people]');if(b){e.preventDefault();openPeopleF(b.dataset.people);}});
+/* ── prezență: formular per atelier (o singură sheet activă) ── */
+let _pzCur=null;
+function openPrez(id){
+  const g=PREZ_GROUPS[id]; if(!g)return; _pzCur=id; g._state=g._state||{};
+  _pst.textContent='prezență · '+g.label;
+  _psb.innerHTML=`<div class="pzhead"><span class="pzcount" id="pzc">…</span><button type="button" class="pzall" data-pzall="1">toți prezenți</button></div><div class="pznote" id="pznote"></div><div class="pzlist" id="pzlist">${g.people.map((p,i)=>`<div class="pzrow" data-pzi="${i}"><span class="pzck" aria-hidden="true"></span><span class="pzinfo"><span class="pznm">${esc(p.name)}</span>${p.sub?`<span class="pzsub">${esc(p.sub)}</span>`:''}</span></div>`).join('')}</div>`;
+  _psheet.hidden=false;requestAnimationFrame(()=>_psheet.classList.add('open'));document.body.classList.add('sheet-open');
+  _paintPz(id);
+  pzSb(`/prezenta_ateliere?zi=eq.${encodeURIComponent(g.zi)}&atelier=eq.${encodeURIComponent(g.atelier)}&select=participant,prezent`)
+    .then(r=>r.ok?r.json():Promise.reject(r.status))
+    .then(rows=>{const st={};rows.forEach(x=>{st[x.participant]=x.prezent;});g._state=st;if(_pzCur===id)_paintPz(id);})
+    .catch(()=>{const n=document.getElementById('pznote');if(n&&_pzCur===id)n.textContent='nu s-a putut încărca starea salvată (verifică netul)';});
+}
+function _paintPz(id){
+  const g=PREZ_GROUPS[id]; if(!g||_pzCur!==id)return; const st=g._state||{};
+  const list=document.getElementById('pzlist'); if(!list)return; let c=0;
+  g.people.forEach((p,i)=>{const row=list.querySelector('.pzrow[data-pzi="'+i+'"]');if(!row)return;const on=!!st[p.name];if(on)c++;row.classList.toggle('on',on);const ck=row.querySelector('.pzck');if(ck)ck.textContent=on?'✓':'';});
+  const cnt=document.getElementById('pzc'); if(cnt)cnt.textContent=c+' / '+g.people.length+' prezenți';
+}
+function _pzSave(g,body){return pzSb('/prezenta_ateliere?on_conflict=zi,atelier,participant',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});}
+function _pzNote(id,msg){const n=document.getElementById('pznote');if(n&&_pzCur===id)n.textContent=msg;}
+function _pzToggle(id,i){
+  const g=PREZ_GROUPS[id]; if(!g)return; const p=g.people[i]; g._state=g._state||{};
+  const now=!g._state[p.name]; g._state[p.name]=now; _paintPz(id); _pzNote(id,'');
+  _pzSave(g,[{zi:g.zi,atelier:g.atelier,participant:p.name,prezent:now}])
+    .then(r=>{if(!r.ok)_pzNote(id,'nesalvat central (rulează SQL-ul în Supabase)');})
+    .catch(()=>_pzNote(id,'nesalvat (offline?)'));
+}
+function _pzAll(id){
+  const g=PREZ_GROUPS[id]; if(!g)return; g._state=g._state||{}; g.people.forEach(p=>{g._state[p.name]=true;}); _paintPz(id); _pzNote(id,'');
+  _pzSave(g,g.people.map(p=>({zi:g.zi,atelier:g.atelier,participant:p.name,prezent:true})))
+    .then(r=>{if(!r.ok)_pzNote(id,'nesalvat central (rulează SQL-ul în Supabase)');})
+    .catch(()=>_pzNote(id,'nesalvat (offline?)'));
+}
+document.addEventListener('click',e=>{
+  const pb=e.target.closest('.pzbtn[data-prez]'); if(pb){e.preventDefault();openPrez(pb.dataset.prez);return;}
+  if(_psheet.hidden||_pzCur==null)return;
+  const pr=e.target.closest('.pzrow[data-pzi]'); if(pr){e.preventDefault();_pzToggle(_pzCur,+pr.dataset.pzi);return;}
+  const pa=e.target.closest('[data-pzall]'); if(pa){e.preventDefault();_pzAll(_pzCur);return;}
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!_psheet.hidden)closePartSheet();});
 
 /* schimbarea zilei */
