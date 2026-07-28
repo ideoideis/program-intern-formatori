@@ -131,10 +131,6 @@ section.day.on{display:block}
 .xrow{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:3px 0}
 .xrow .xa{color:var(--fg);font-weight:500}
 .xrow .xb{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
-.xvol{font-size:12.5px;color:var(--muted);padding:2px 0 9px;line-height:1.7}
-.xvol .vname{color:var(--fg)}
-.xvol .vghid{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber-dim);margin-left:3px}
-.xvol .vno{color:var(--muted);font-size:11px}
 
 /* ── benzi transport & masă (listă) ──────── */
 .tr{display:flex;align-items:baseline;gap:10px;border-top:1px dashed rgba(255,196,46,.45);border-bottom:1px dashed rgba(255,196,46,.45);padding:9px 2px;margin:14px 0;flex-wrap:wrap}
@@ -221,6 +217,18 @@ body.sheet-open{overflow:hidden}
 .parth{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);margin:18px 0 8px;font-weight:600}
 .partgrp:first-child .parth{margin-top:2px}
 .parth small{color:var(--muted)}
+/* listă persoane în sheet (butonul „voluntari") — la fel ca pe programul intern mare */
+.plist{display:flex;flex-direction:column;gap:2px}
+.prow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.prow:last-child{border-bottom:0}
+.pav{flex:0 0 auto;width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--line)}
+.pav.ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;background:hsl(var(--h,0),42%,44%)}
+.pinfo{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pnm{font-weight:500;font-size:15px}
+.prole{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--amber-dim)}
+.pcall{flex:0 0 auto;font-family:var(--mono);font-size:12px;color:var(--amber);text-decoration:none;border:1px solid rgba(255,196,46,.5);padding:6px 12px}
+.pcall:hover{border-color:var(--amber)}
+.pcall.no{color:var(--muted);border-color:var(--line);cursor:default}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 .bigpublic{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--red);color:#fff;text-decoration:none;padding:16px;font-weight:700;font-size:17px;margin-bottom:4px}
 .bigpublic small{display:block;font-weight:400;font-family:var(--mono);font-size:11px;opacity:.85;margin-top:2px}

@@ -41,7 +41,15 @@ const _TEL = (()=>{const a=[]; const add=(n,ph)=>{ if(ph&&/\d/.test(ph)) a.push(
 function phoneOf(name){ const t=new Set(_nrm(name).split(/[^a-z0-9]+/).filter(Boolean));
   let e=_TEL.find(x=>x.t.size===t.size&&[...t].every(y=>x.t.has(y))); if(e)return e.ph;
   for(const x of _TEL){ const sh=[...t].filter(y=>x.t.has(y)).length; if(sh>=2&&(sh===t.size||sh===x.t.size))return x.ph; } return null; }
-function volsHtml(str){ if(!str)return ''; return str.split(/\s*\+\s*/).map(p=>{ p=p.trim(); if(!p)return ''; const g=/\(ghid\)/i.test(p); const nm=p.replace(/\s*\(ghid\)/i,'').trim(); const ph=phoneOf(nm); return `<span class="vname">${esc(nm)}${g?' <span class="vghid">ghid</span>':''}</span>${ph?` <a class="tel" href="tel:${ph.replace(/\s/g,'')}">${ph}</a>`:' <span class="vno">fără nr.</span>'}`; }).filter(Boolean).join('<br>'); }
+/* people-picker: buton „voluntari" → sheet cu poză/inițiale + telefon, ca pe programul mare */
+function _nmToks(s){s=String(s).normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t');return new Set(s.split(/[^a-z0-9]+/).filter(Boolean));}
+const _PHIDX=(()=>{const a=[];if(typeof PHOTOS!=='undefined')for(const k in PHOTOS)a.push([_nmToks(k),PHOTOS[k]]);return a;})();
+function photoFor(n){if(!n)return null;if(typeof PHOTOS!=='undefined'&&PHOTOS[n])return PHOTOS[n];const t=_nmToks(n);if(t.size<2)return null;for(const [kt,p] of _PHIDX){if(kt.size!==t.size)continue;let eq=true;for(const x of t)if(!kt.has(x)){eq=false;break;}if(eq)return p;}let hit=null,many=false;for(const [kt,p] of _PHIDX){const sm=t.size<=kt.size?t:kt,lg=t.size<=kt.size?kt:t;if(sm.size<2)continue;let sub=true;for(const x of sm)if(!lg.has(x)){sub=false;break;}if(sub){if(hit&&hit!==p){many=true;break;}hit=p;}}return many?null:hit;}
+function peopleFromStr(str,roleDefault){return String(str).split(/\s*\+\s*|,\s*/).map(p=>{p=p.trim();if(!p)return null;const isGhid=/\(ghid\)/i.test(p);const name=p.replace(/\s*\(ghid\)/i,'').trim();return {name,role:isGhid?'ghid':(roleDefault||''),tel:phoneOf(name),photo:photoFor(name)};}).filter(Boolean);}
+let _pgSeq=0; const PEOPLE_GROUPS={};
+function peopleButton(people,btnLabel,sheetTitle){people=(people||[]).filter(Boolean);if(!people.length)return '';const id='pg'+(++_pgSeq);PEOPLE_GROUPS[id]={label:sheetTitle||btnLabel,people};const names=people.map(p=>p.name).join(', ');return `<button type="button" class="pbtn" data-people="${id}" aria-label="${esc(btnLabel+': '+names)}">${esc(btnLabel)}${people.length>1?`<span class="pbn">${people.length}</span>`:''}<span class="pbc">›</span></button>`;}
+function _initials(n){return n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function _hue(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
 const mins = hm => { const [h,m]=hm.split(':').map(Number); let v=h*60+m; if(h<5)v+=1440; return v; };
 const smins = ev => mins(ev.ts || ev.t);
 const maps = q => 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((typeof MAPQ!=='undefined'&&MAPQ[q])||q+' Alexandria');
@@ -147,9 +155,9 @@ function detailRows(ev){
   const needs=AUD.showNeeds!==false;
   let rows=[];
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
-    rows=ATELIERE_TT.map(r=>['@html',`<div class="xrow"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb">${esc(r[2])}${r[3]?' · '+esc(r[3]):''}</span></div>${r[4]?`<div class="xvol">${volsHtml(r[4])}</div>`:''}`]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
+    rows=ATELIERE_TT.map(r=>['@html',`<div class="xrow" style="align-items:flex-start"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${esc(r[2])}${r[3]?' · '+esc(r[3]):''}${r[4]?peopleButton(peopleFromStr(r[4]),'voluntari',`${r[0]} · ${r[1]}`):''}</span></div>`]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>['@html',`<div class="xrow"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb">${esc(roomClean(r[2]))}</span></div>${r[6]?`<div class="xvol">${volsHtml(r[6])}</div>`:''}`]);
+    rows=ARTE_ALATURATE.map(r=>['@html',`<div class="xrow" style="align-items:flex-start"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${esc(roomClean(r[2]))}${r[6]?peopleButton(peopleFromStr(r[6]),'voluntari',`${r[0]}`):''}</span></div>`]);
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
@@ -609,6 +617,8 @@ function openAllPartSheet(){
 function closePartSheet(){_psheet.classList.remove('open');document.body.classList.remove('sheet-open');setTimeout(()=>{_psheet.hidden=true;},220);}
 _psheet.addEventListener('click',e=>{if(e.target===_psheet||e.target.closest('.sheet-x'))closePartSheet();});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-partall]');if(b){e.preventDefault();openAllPartSheet();}});
+function openPeopleF(id){const g=PEOPLE_GROUPS[id];if(!g)return;_pst.textContent=g.label;_psb.innerHTML='<div class="plist">'+g.people.map(p=>{const nm=p.name||'';const av=p.photo?`<img class="pav" src="${p.photo}" alt="${esc(nm)}">`:`<span class="pav ini" style="--h:${_hue(nm)}">${esc(_initials(nm))}</span>`;const role=p.role?`<span class="prole">${esc(p.role)}</span>`:'';const tel=(p.tel||'').replace(/\s/g,'');const call=tel?`<a class="pcall" href="tel:${tel}">sună</a>`:`<span class="pcall no">fără nr.</span>`;return `<div class="prow">${av}<div class="pinfo"><span class="pnm">${esc(nm)}</span>${role}</div>${call}</div>`;}).join('')+'</div>';_psheet.hidden=false;requestAnimationFrame(()=>_psheet.classList.add('open'));document.body.classList.add('sheet-open');const x=_psheet.querySelector('.sheet-x');if(x)x.focus();}
+document.addEventListener('click',e=>{const b=e.target.closest('.pbtn[data-people]');if(b){e.preventDefault();openPeopleF(b.dataset.people);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!_psheet.hidden)closePartSheet();});
 
 /* schimbarea zilei */
