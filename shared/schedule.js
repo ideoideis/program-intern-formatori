@@ -32,6 +32,16 @@ const INFO = AUD.info || {};
 
 /* ── utilitare ──────────────────────────── */
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* telefoane voluntari (pentru ateliere): din CONTACTS + EXTRA_PHONES, potrivire pe set de tokeni */
+const _nrm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ș/g,'s').replace(/ț/g,'t').replace(/î/g,'i').replace(/â/g,'a');
+const _TEL = (()=>{const a=[]; const add=(n,ph)=>{ if(ph&&/\d/.test(ph)) a.push({t:new Set(_nrm(n).split(/[^a-z0-9]+/).filter(Boolean)),ph}); };
+  if(typeof CONTACTS!=='undefined') CONTACTS.forEach(([d,ppl])=>ppl.forEach(x=>add(x[0],x[2])));
+  if(typeof EXTRA_PHONES!=='undefined') Object.entries(EXTRA_PHONES).forEach(([n,ph])=>add(n,ph));
+  return a;})();
+function phoneOf(name){ const t=new Set(_nrm(name).split(/[^a-z0-9]+/).filter(Boolean));
+  let e=_TEL.find(x=>x.t.size===t.size&&[...t].every(y=>x.t.has(y))); if(e)return e.ph;
+  for(const x of _TEL){ const sh=[...t].filter(y=>x.t.has(y)).length; if(sh>=2&&(sh===t.size||sh===x.t.size))return x.ph; } return null; }
+function volsHtml(str){ if(!str)return ''; return str.split(/\s*\+\s*/).map(p=>{ p=p.trim(); if(!p)return ''; const g=/\(ghid\)/i.test(p); const nm=p.replace(/\s*\(ghid\)/i,'').trim(); const ph=phoneOf(nm); return `<span class="vname">${esc(nm)}${g?' <span class="vghid">ghid</span>':''}</span>${ph?` <a class="tel" href="tel:${ph.replace(/\s/g,'')}">${ph}</a>`:' <span class="vno">fără nr.</span>'}`; }).filter(Boolean).join('<br>'); }
 const mins = hm => { const [h,m]=hm.split(':').map(Number); let v=h*60+m; if(h<5)v+=1440; return v; };
 const smins = ev => mins(ev.ts || ev.t);
 const maps = q => 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((typeof MAPQ!=='undefined'&&MAPQ[q])||q+' Alexandria');
@@ -137,9 +147,9 @@ function detailRows(ev){
   const needs=AUD.showNeeds!==false;
   let rows=[];
   if(ev.title==='ateliere teatru tânăr' && typeof ATELIERE_TT!=='undefined')
-    rows=ATELIERE_TT.map(r=>[`${r[0]} · ${r[1]}`, r[2]+(r[3]?' · '+r[3]:'')]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
+    rows=ATELIERE_TT.map(r=>['@html',`<div class="xrow"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb">${esc(r[2])}${r[3]?' · '+esc(r[3]):''}</span></div>${r[4]?`<div class="xvol">${volsHtml(r[4])}</div>`:''}`]).concat(needs&&typeof TT_NEEDS!=='undefined'?[['necesar / atelier',TT_NEEDS]]:[]);
   else if(ev.title==='ateliere arte alăturate' && typeof ARTE_ALATURATE!=='undefined')
-    rows=ARTE_ALATURATE.map(r=>[`${r[0]} · ${r[1]}`, roomClean(r[2])]);
+    rows=ARTE_ALATURATE.map(r=>['@html',`<div class="xrow"><span class="xa">${esc(r[0])} · ${esc(r[1])}</span><span class="xb">${esc(roomClean(r[2]))}</span></div>${r[6]?`<div class="xvol">${volsHtml(r[6])}</div>`:''}`]);
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
     if(lg.n)rows.push(['participanți',lg.n]);
