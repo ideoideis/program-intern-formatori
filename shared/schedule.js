@@ -642,16 +642,18 @@ function openPeopleF(id){const g=PEOPLE_GROUPS[id];if(!g)return;_pst.textContent
 document.addEventListener('click',e=>{const b=e.target.closest('.pbtn[data-people]');if(b){e.preventDefault();openPeopleF(b.dataset.people);}});
 /* ── prezență: formular per atelier (o singură sheet activă) ── */
 let _pzCur=null;
+function _pzTime(){try{return new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function _pzMsg(id,txt,cls){const m=document.getElementById('pzsavemsg');if(m&&_pzCur===id){m.textContent=txt;m.className='pzsavemsg'+(cls?' '+cls:'');}}
 function openPrez(id){
   const g=PREZ_GROUPS[id]; if(!g)return; _pzCur=id; g._state=g._state||{};
   _pst.textContent='prezență · '+g.label;
-  _psb.innerHTML=`<div class="pzhead"><span class="pzcount" id="pzc">…</span><button type="button" class="pzall" data-pzall="1">toți prezenți</button></div><div class="pznote" id="pznote"></div><div class="pzlist" id="pzlist">${g.people.map((p,i)=>`<div class="pzrow" data-pzi="${i}"><span class="pzck" aria-hidden="true"></span><span class="pzinfo"><span class="pznm">${esc(p.name)}</span>${p.sub?`<span class="pzsub">${esc(p.sub)}</span>`:''}</span></div>`).join('')}</div>`;
+  _psb.innerHTML=`<div class="pzhead"><span class="pzcount" id="pzc">…</span><button type="button" class="pzall" data-pzall="1">toți prezenți</button></div><div class="pzlist" id="pzlist">${g.people.map((p,i)=>`<div class="pzrow" data-pzi="${i}"><span class="pzck" aria-hidden="true"></span><span class="pzinfo"><span class="pznm">${esc(p.name)}</span>${p.sub?`<span class="pzsub">${esc(p.sub)}</span>`:''}</span></div>`).join('')}</div><div class="pzsave"><button type="button" class="pzsavebtn" data-pzsave="1">salvează prezența</button><span class="pzsavemsg" id="pzsavemsg"></span></div>`;
   _psheet.hidden=false;requestAnimationFrame(()=>_psheet.classList.add('open'));document.body.classList.add('sheet-open');
   _paintPz(id);
   pzSb(`/prezenta_ateliere?zi=eq.${encodeURIComponent(g.zi)}&atelier=eq.${encodeURIComponent(g.atelier)}&select=participant,prezent`)
     .then(r=>r.ok?r.json():Promise.reject(r.status))
-    .then(rows=>{const st={};rows.forEach(x=>{st[x.participant]=x.prezent;});g._state=st;if(_pzCur===id)_paintPz(id);})
-    .catch(()=>{const n=document.getElementById('pznote');if(n&&_pzCur===id)n.textContent='nu s-a putut încărca starea salvată (verifică netul)';});
+    .then(rows=>{const st={};rows.forEach(x=>{st[x.participant]=x.prezent;});g._state=st;if(_pzCur===id){_paintPz(id);if(rows.length)_pzMsg(id,'salvat ✓','ok');}})
+    .catch(()=>_pzMsg(id,'de rulat o dată SQL-ul în Supabase','err'));
 }
 function _paintPz(id){
   const g=PREZ_GROUPS[id]; if(!g||_pzCur!==id)return; const st=g._state||{};
@@ -660,25 +662,28 @@ function _paintPz(id){
   const cnt=document.getElementById('pzc'); if(cnt)cnt.textContent=c+' / '+g.people.length+' prezenți';
 }
 function _pzSave(g,body){return pzSb('/prezenta_ateliere?on_conflict=zi,atelier,participant',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});}
-function _pzNote(id,msg){const n=document.getElementById('pznote');if(n&&_pzCur===id)n.textContent=msg;}
 function _pzToggle(id,i){
   const g=PREZ_GROUPS[id]; if(!g)return; const p=g.people[i]; g._state=g._state||{};
-  const now=!g._state[p.name]; g._state[p.name]=now; _paintPz(id); _pzNote(id,'');
-  _pzSave(g,[{zi:g.zi,atelier:g.atelier,participant:p.name,prezent:now}])
-    .then(r=>{if(!r.ok)_pzNote(id,'nesalvat central (rulează SQL-ul în Supabase)');})
-    .catch(()=>_pzNote(id,'nesalvat (offline?)'));
+  g._state[p.name]=!g._state[p.name]; _paintPz(id); _pzMsg(id,'se salvează…','');
+  _pzSave(g,[{zi:g.zi,atelier:g.atelier,participant:p.name,prezent:g._state[p.name]}])
+    .then(r=>_pzMsg(id, r.ok?('salvat ✓ '+_pzTime()):'nesalvat — apasă „salvează prezența"', r.ok?'ok':'err'))
+    .catch(()=>_pzMsg(id,'nesalvat — apasă „salvează prezența"','err'));
+}
+function _pzSaveAll(id){
+  const g=PREZ_GROUPS[id]; if(!g)return; g._state=g._state||{}; _pzMsg(id,'se salvează…','');
+  _pzSave(g,g.people.map(p=>({zi:g.zi,atelier:g.atelier,participant:p.name,prezent:!!g._state[p.name]})))
+    .then(r=>_pzMsg(id, r.ok?('salvat ✓ '+_pzTime()):'eroare la salvare — reîncearcă', r.ok?'ok':'err'))
+    .catch(()=>_pzMsg(id,'eroare la salvare (offline?)','err'));
 }
 function _pzAll(id){
-  const g=PREZ_GROUPS[id]; if(!g)return; g._state=g._state||{}; g.people.forEach(p=>{g._state[p.name]=true;}); _paintPz(id); _pzNote(id,'');
-  _pzSave(g,g.people.map(p=>({zi:g.zi,atelier:g.atelier,participant:p.name,prezent:true})))
-    .then(r=>{if(!r.ok)_pzNote(id,'nesalvat central (rulează SQL-ul în Supabase)');})
-    .catch(()=>_pzNote(id,'nesalvat (offline?)'));
+  const g=PREZ_GROUPS[id]; if(!g)return; g._state=g._state||{}; g.people.forEach(p=>{g._state[p.name]=true;}); _paintPz(id); _pzSaveAll(id);
 }
 document.addEventListener('click',e=>{
   const pb=e.target.closest('.pzbtn[data-prez]'); if(pb){e.preventDefault();openPrez(pb.dataset.prez);return;}
   if(_psheet.hidden||_pzCur==null)return;
-  const pr=e.target.closest('.pzrow[data-pzi]'); if(pr){e.preventDefault();_pzToggle(_pzCur,+pr.dataset.pzi);return;}
+  const ps=e.target.closest('[data-pzsave]'); if(ps){e.preventDefault();_pzSaveAll(_pzCur);return;}
   const pa=e.target.closest('[data-pzall]'); if(pa){e.preventDefault();_pzAll(_pzCur);return;}
+  const pr=e.target.closest('.pzrow[data-pzi]'); if(pr){e.preventDefault();_pzToggle(_pzCur,+pr.dataset.pzi);return;}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!_psheet.hidden)closePartSheet();});
 
