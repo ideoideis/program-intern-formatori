@@ -194,10 +194,7 @@ function detailRows(ev,dayId){
     });
   else if(typeof ARTPLAY_PART!=='undefined' && _apKey(ev)){
     const key=_apKey(ev), roster=apRoster(key);
-    if(roster.length){
-      rows.push(['participanți', peopleButton(roster.map(p=>({name:p.name,role:'',tel:p.tel,photo:(typeof photoFor==='function'?photoFor(p.name):null)})),'participanți',ev.title)]);
-      rows.push(['prezență', prezButton(dayId,'ap:'+key,ev.title,roster.map(p=>({name:p.name,sub:''})))]);
-    }
+    if(roster.length) rows.push(['prezență', prezButton(dayId,'ap:'+key,ev.title,roster.map(p=>({name:p.name,sub:''})))]);
   }
   const lg=(typeof LOGISTICS!=='undefined')?LOGISTICS[ev.title]:null;
   if(lg){
