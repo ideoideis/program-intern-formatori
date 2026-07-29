@@ -224,7 +224,7 @@ function evHtml(ev,dayId){
     x=`<button class="xbtn" data-x>▸ ${det.label}</button><div class="xlist">${rows}</div>`;
   }
   const subs=(ev.sub||[]).map(s=>`<div class="sub">${s}</div>`).join('');
-  const room=lg&&lg.sala?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
+  const room=lg&&lg.sala&&!ev.locd?` · ${esc(roomClean(lg.sala))}<span style="color:var(--muted)">*</span>`:'';
   const locline=ev.loc?`<div class="locline"><b>${esc(ev.loc)}</b>${ev.locd?' · '+esc(ev.locd):''}${room}</div>`:'';
   /* fișa spectacolului, direct pe cardul lui */
   let tinfo='';
