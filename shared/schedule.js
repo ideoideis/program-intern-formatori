@@ -419,7 +419,7 @@ infoS.innerHTML=`
       <div class="tscroll"><table class="ttable">
         <tr><th>trupă</th><th>trainer · sală (Șc. 5)</th><th>coordonator</th><th>ghid</th></tr>
         ${TRUPE.map(r=>{const np=(typeof REPARTIZARE!=='undefined'&&typeof TRUPE_IDS!=='undefined')?(()=>{const s=Object.keys(TRUPE_IDS).find(k=>TRUPE_IDS[k]===r[0]);return s&&REPARTIZARE[s]?REPARTIZARE[s][1].length:0;})():0;return `<tr><td><b>${r[0]}</b>${np?`<br><small>${np} participanți</small>`:''}</td><td><small>${r[1]}</small></td><td>${tel(r[2],r[3])}</td><td>${tel(r[4],r[5])}</td></tr>`;}).join('')}
-        <tr><td><b>Train the Coordinators</b><br><small>7 participanți</small></td><td><small>mentori & coordonatori · Șc. 5 · sala 13</small></td><td>·</td><td>·</td></tr>
+        <tr><td><b>Train the Coordinators</b><br><small>7 participanți</small></td><td><small>mentori & coordonatori · Șc. 5 · sala 6</small></td><td>·</td><td>·</td></tr>
       </table></div>
     </div>`:''}
     ${(INFO.formatori && typeof FORMATORI!=='undefined')?`<div class="iblock wide acc">
