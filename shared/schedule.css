@@ -352,3 +352,6 @@ body.sheet-open{overflow:hidden}
 }
 
 .waterbanner{background:rgba(255,196,46,.12);border:1px solid rgba(255,196,46,.55);color:var(--fg);padding:11px 14px;font-size:14.5px;font-weight:500;margin:0 0 16px;display:flex;align-items:center;gap:9px}
+
+.clap{position:fixed;z-index:3000;pointer-events:none;font-size:22px;animation:clapUp .95s ease-out forwards}
+@keyframes clapUp{0%{opacity:0;transform:translateY(0) scale(.6)}18%{opacity:1}100%{opacity:0;transform:translateY(-72px) scale(1.15)}}

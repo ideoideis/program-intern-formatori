@@ -145,7 +145,12 @@ function nearestDay(){
 /* ── banda de zile ──────────────────────── */
 const railEl=document.getElementById('rail');
 const daysEl=document.getElementById('days');
-(function(){const w=daysEl&&daysEl.closest('.wrap');if(w)w.insertAdjacentHTML('afterbegin','<div class="waterbanner">💧 nu uita să bei apă!</div>');})();
+(function(){const w=daysEl&&daysEl.closest('.wrap');if(w)w.insertAdjacentHTML('afterbegin','<div class="waterbanner">💧 nu uita să bei apă!</div>');
+  function _hotWater(){const el=document.querySelector('.waterbanner');if(!el)return;const mm=((roNow().mins%1440)+1440)%1440;el.textContent=(mm>=720&&mm<960)?'🔥 caniculă la Alexandria · bea apă!':'💧 nu uita să bei apă!';}
+  _hotWater(); setInterval(_hotWater,30000);
+  function _clap(x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(let i=0;i<5;i++){const c=document.createElement('span');c.className='clap';c.textContent='👏';c.style.left=(x+(Math.random()*40-20))+'px';c.style.top=(y-8)+'px';c.style.animationDelay=(i*55)+'ms';document.body.appendChild(c);setTimeout(()=>c.remove(),1200+i*55);}}
+  document.addEventListener('click',_e=>{if(_e.target.closest('button,a,input,summary,[data-x],.pbtn,.pzbtn,.xbtn'))return;const card=_e.target.closest('.ev');if(card&&/spectacol/i.test(card.textContent))_clap(_e.clientX,_e.clientY);});
+})();
 DAYS_A.forEach(d=>{
   const b=document.createElement('button');
   b.className='daychip'; b.dataset.day=d.id; b.setAttribute('aria-selected','false');
