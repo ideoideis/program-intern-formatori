@@ -350,3 +350,5 @@ body.sheet-open{overflow:hidden}
   .info-grid{grid-template-columns:1fr 1fr}
   .iblock.wide{grid-column:1/-1}
 }
+
+.waterbanner{background:rgba(255,196,46,.12);border:1px solid rgba(255,196,46,.55);color:var(--fg);padding:11px 14px;font-size:14.5px;font-weight:500;margin:0 0 16px;display:flex;align-items:center;gap:9px}
