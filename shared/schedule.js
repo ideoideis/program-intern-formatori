@@ -68,6 +68,7 @@ const lu=document.getElementById('lastupd'); if(lu)lu.textContent=LAST_UPDATED;
 /* ── ce evenimente intră în programul acestui public ── */
 function deDiac(s){return String(s).toLowerCase().replace(/[ăâáà]/g,'a').replace(/[îí]/g,'i').replace(/[éè]/g,'e').replace(/[óò]/g,'o').replace(/[úù]/g,'u').replace(/[șş]/g,'s').replace(/[țţ]/g,'t');}
 function includeEvent(ev){
+  if(ev.onlyMain) return false; /* doar pe programul intern mare */
   if(ev.k==='e'){
     const t=ev.title||'';
     /* excepții punctuale, pe titlu: scoase sau băgate indiferent de categorie */
