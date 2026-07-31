@@ -238,8 +238,9 @@ function evHtml(ev,dayId){
      && typeof TRUPE_INFO!=='undefined' && TRUPE_INFO[ev.trupa]){
     tinfo=`<button class="xbtn" data-x>▸ despre spectacol & trupă</button><div class="xlist">${trupaFisa(ev.trupa)}</div>`;
   }
-  return `<article class="ev${ev.c?' compact':''}" data-eid="${eid}" data-cat="${ev.cat||'alt'}"${ev.c?' data-tech="1"':''}${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${mins(ev.t)}"${ev.e?` data-e="${mins(ev.e)}"`:''} data-search="${esc(search)}" style="--cat:${cat.color}">
-    <div class="tcol"><div class="t1">${ev.t}</div>${ev.e?`<div class="t2">${ev.e}</div>`:''}</div>
+  const _tt=(AUD.lockTrupa&&ev.trupaStart&&ev.trupaStart[AUD.lockTrupa])||ev.t;
+  return `<article class="ev${ev.c?' compact':''}" data-eid="${eid}" data-cat="${ev.cat||'alt'}"${ev.c?' data-tech="1"':''}${ev.trupa?` data-trupa="${ev.trupa}"`:''} data-s="${mins(_tt)}"${ev.e?` data-e="${mins(ev.e)}"`:''} data-search="${esc(search)}" style="--cat:${cat.color}">
+    <div class="tcol"><div class="t1">${_tt}</div>${ev.e?`<div class="t2">${ev.e}</div>`:''}</div>
     <div>
       <div class="title">${ev.title}<span class="nowtag" hidden>acum</span></div>
       ${locline}${subs}${x}${tinfo}
@@ -544,6 +545,7 @@ function selectTrupa(id,jump){
 const catchips=document.getElementById('catchips');
 const filtersBox=document.getElementById('filters');
 const selCats=new Set();
+let mentoriOnly=false;
 function chipToggle(b,id){
   const on=b.getAttribute('aria-pressed')==='true';
   b.setAttribute('aria-pressed',String(!on));
@@ -577,6 +579,17 @@ if(AUD.showTech!==false){
   });
   catchips.appendChild(techChip);
 }
+/* filtru „mentori": doar cardurile care menționează mentori */
+const menChip=document.createElement('button');
+menChip.className='fchip men'; menChip.setAttribute('aria-pressed','false'); menChip.style.setProperty('--selc','#E7004C');
+menChip.innerHTML='<span class="sw" style="background:#E7004C"></span>mentori';
+menChip.addEventListener('click',()=>{
+  mentoriOnly=!mentoriOnly;
+  menChip.setAttribute('aria-pressed',String(mentoriOnly));
+  filtersBox.classList.toggle('filtering',selCats.size>0||mentoriOnly);
+  applyFilters();
+});
+catchips.appendChild(menChip);
 
 /* plierea zonei de filtre */
 const fhead=document.getElementById('fhead');
@@ -633,7 +646,7 @@ function applyFilters(){
   const term=deDiac(q.value.trim().toLowerCase());
   const filtering=selCats.size>0;
   const techOn=techChip?techChip.getAttribute('aria-pressed')==='true':true;
-  const nActive=selCats.size+(techChip&&!techOn?1:0)+(term?1:0);
+  const nActive=selCats.size+(techChip&&!techOn?1:0)+(term?1:0)+(mentoriOnly?1:0);
   document.getElementById('fcount').textContent=nActive?` · ${nActive} active`:'';
   daysEl.querySelectorAll('.ev,.tr,.meal,.tech,.gblock,.gtr,.gtrt').forEach(el=>{
     /* urmărirea unei trupe: ascunde rândurile marcate cu ALTE trupe */
@@ -647,6 +660,7 @@ function applyFilters(){
       if(filtering && el.dataset.cat) show=selCats.has(el.dataset.cat);
       if(show && el.dataset.tech && !techOn) show=false;
     }
+    if(show && mentoriOnly){const s=el.dataset.search!==undefined?deDiac(el.dataset.search):'';if(!s.includes('mentori'))show=false;}
     if(show && term && el.dataset.search!==undefined && !deDiac(el.dataset.search).includes(term)) show=false;
     el.style.display=show?'':'none';
   });
